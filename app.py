@@ -273,7 +273,7 @@ def parse_uploaded_files(uploaded_files):
 
 
 # ==========================================
-# 5. GEMINI AI ENGINE
+# 5. GEMINI AI ENGINE WITH AUTO-FALLBACK
 # ==========================================
 def run_packaging_audit(api_key: str, model_name: str, gemini_parts: list, user_notes: str) -> PackagingAnalysisResult:
     client = genai.Client(api_key=api_key)
@@ -283,17 +283,28 @@ def run_packaging_audit(api_key: str, model_name: str, gemini_parts: list, user_
     Extract facts with exact source citations, detect contradictions/errors, and identify missing brief requirements.
     """
     contents = gemini_parts + [f"Additional Brand Manager Notes:\n{user_notes if user_notes else 'None.'}"]
-    response = client.models.generate_content(
-        model=model_name,
-        contents=contents,
-        config=types.GenerateContentConfig(
-            system_instruction=system_prompt,
-            response_mime_type="application/json",
-            response_schema=PackagingAnalysisResult,
-            temperature=0.1,
-        ),
-    )
-    return PackagingAnalysisResult.model_validate_json(response.text)
+    
+    models_to_try = [model_name, "gemini-1.5-flash", "gemini-1.5-pro", "gemini-flash-latest"]
+    last_error = None
+
+    for m in models_to_try:
+        try:
+            response = client.models.generate_content(
+                model=m,
+                contents=contents,
+                config=types.GenerateContentConfig(
+                    system_instruction=system_prompt,
+                    response_mime_type="application/json",
+                    response_schema=PackagingAnalysisResult,
+                    temperature=0.1,
+                ),
+            )
+            return PackagingAnalysisResult.model_validate_json(response.text)
+        except Exception as e:
+            last_error = e
+            continue
+            
+    raise last_error
 
 
 def generate_final_brief(
@@ -313,16 +324,27 @@ def generate_final_brief(
     --- CHAT ---
     {json.dumps(chat_history, indent=2)}
     """
-    response = client.models.generate_content(
-        model=model_name,
-        contents=prompt,
-        config=types.GenerateContentConfig(
-            response_mime_type="application/json",
-            response_schema=FinalAgencyBrief,
-            temperature=0.2,
-        ),
-    )
-    return FinalAgencyBrief.model_validate_json(response.text)
+    
+    models_to_try = [model_name, "gemini-1.5-flash", "gemini-1.5-pro", "gemini-flash-latest"]
+    last_error = None
+
+    for m in models_to_try:
+        try:
+            response = client.models.generate_content(
+                model=m,
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    response_mime_type="application/json",
+                    response_schema=FinalAgencyBrief,
+                    temperature=0.2,
+                ),
+            )
+            return FinalAgencyBrief.model_validate_json(response.text)
+        except Exception as e:
+            last_error = e
+            continue
+            
+    raise last_error
 
 
 # ==========================================
