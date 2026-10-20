@@ -734,12 +734,21 @@ def main():
         st.markdown("## 📦 Esko Brief Studio")
         st.caption("AI-Powered Packaging Pre-Press & Design Brief Engine")
 
-        api_key = st.text_input("🔑 Gemini API Key", type="password", help="Enter your Google Gemini API key")
+        api_key = st.text_input(
+            "🔑 Gemini API Key",
+            type="password",
+            help="Enter your Google Gemini API key",
+        )
         model_name = st.selectbox(
             "🤖 AI Reasoning Model",
-            options=["gemini-2.5-flash", "gemini-3.8-pro", "gemini-2.5-flash", "gemini-flash-latest"],
+            options=[
+                "gemini-2.0-flash",
+                "gemini-1.5-pro",
+                "gemini-flash-latest",
+            ],
             index=0,
-            help="Defaults to gemini-2.5-flash",
+            help="Defaults to gemini-2.0-flash",
+        )
         )
 
         st.divider()
