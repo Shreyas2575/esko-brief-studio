@@ -210,7 +210,7 @@ def verify_upc_a(barcode_str: str) -> dict:
 
 
 # ==========================================
-# 4. PARSERS & VISION EXTRACTORS
+# 4. PARSERS & OPTIMIZED VISION EXTRACTORS
 # ==========================================
 def parse_uploaded_files(uploaded_files):
     gemini_parts = []
@@ -227,8 +227,11 @@ def parse_uploaded_files(uploaded_files):
             for page_idx in range(len(doc)):
                 page = doc[page_idx]
                 pdf_text_blocks.append(f"--- {fname} (Page {page_idx + 1}) ---\n{page.get_text()}")
-                pix = page.get_pixmap(matrix=fitz.Matrix(2.2, 2.2))
+                # Render at safe 1.3x zoom and resize to prevent payload size errors
+                pix = page.get_pixmap(matrix=fitz.Matrix(1.3, 1.3))
                 img = Image.open(io.BytesIO(pix.tobytes("png")))
+                img.thumbnail((1024, 1024))
+                
                 gemini_parts.append(f"Visual artwork image from file '{fname}' Page {page_idx + 1}:")
                 gemini_parts.append(img)
                 visual_assets.append({
@@ -253,6 +256,7 @@ def parse_uploaded_files(uploaded_files):
 
         elif fname.lower().endswith((".png", ".jpg", ".jpeg", ".webp")):
             img = Image.open(io.BytesIO(raw_bytes))
+            img.thumbnail((1024, 1024))
             gemini_parts.append(f"Image '{fname}':")
             gemini_parts.append(img)
             visual_assets.append({"title": f"{fname}", "image": img, "source": fname})
