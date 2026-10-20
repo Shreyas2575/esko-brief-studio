@@ -512,9 +512,9 @@ def main():
         api_key = st.text_input("🔑 Gemini API Key", type="password", help="Enter your Google Gemini API key")
         model_name = st.selectbox(
             "🤖 AI Reasoning Model",
-            options=["gemini-2.0-flash", "gemini-1.5-pro", "gemini-flash-latest"],
+            options=["gemini-1.5-flash", "gemini-1.5-pro", "gemini-flash-latest"],
             index=0,
-            help="Defaults to gemini-2.0-flash",
+            help="Defaults to gemini-1.5-flash",
         )
         st.divider()
         if st.session_state.file_summaries:
