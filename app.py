@@ -737,9 +737,9 @@ def main():
         api_key = st.text_input("🔑 Gemini API Key", type="password", help="Enter your Google Gemini API key")
         model_name = st.selectbox(
             "🤖 AI Reasoning Model",
-            options=["gemini-3.8-flash", "gemini-3.8-pro", "gemini-2.5-flash", "gemini-flash-latest"],
+            options=["gemini-2.5-flash", "gemini-3.8-pro", "gemini-2.5-flash", "gemini-flash-latest"],
             index=0,
-            help="Defaults to gemini-3.8-flash",
+            help="Defaults to gemini-2.5-flash",
         )
 
         st.divider()
